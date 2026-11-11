@@ -93,14 +93,19 @@ APPS = {}  # path_hash -> (Application, token)
 
 async def react(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
+    log.info("child update: chat=%s type=%s", getattr(msg, "chat_id", None), getattr(getattr(msg, "chat", None), "type", None))
     if not msg or msg.chat.type == "private":
         return
-    try:
-        await context.bot.set_message_reaction(
-            chat_id=msg.chat_id, message_id=msg.message_id,
-            reaction=[ReactionTypeEmoji(random.choice(REACTIONS))])
-    except Exception as e:
-        log.warning("react failed: %s", e)
+    emojis = REACTIONS[:]
+    random.shuffle(emojis)
+    for e in emojis[:3]:
+        try:
+            await context.bot.set_message_reaction(
+                chat_id=msg.chat_id, message_id=msg.message_id,
+                reaction=[ReactionTypeEmoji(e)])
+            return
+        except Exception as ex:
+            log.error("react failed (%s): %s", e, ex)
 
 async def start_child(token):
     app = ApplicationBuilder().token(token).updater(None).build()
