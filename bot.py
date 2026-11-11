@@ -369,10 +369,11 @@ async def on_startup(web_app):
     main.add_handler(CallbackQueryHandler(remove_cb, pattern="^rm:"))
     main.add_handler(CallbackQueryHandler(admin_cb, pattern="^ad:"))
     main.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, text_router))
+    main.add_handler(MessageHandler(~filters.ChatType.PRIVATE, react))
     await main.initialize()
     await main.start()
     await main.bot.set_webhook(f"{BASE_URL}/hook/{h(MAIN_TOKEN)}", secret_token=secret(MAIN_TOKEN),
-                               allowed_updates=["message", "callback_query"])
+                               allowed_updates=["message", "callback_query", "channel_post"])
     APPS[h(MAIN_TOKEN)] = (main, MAIN_TOKEN)
     # সেভ করা সব ইউজার-বট আবার চালু
     for t in list(db.data["bots"]):
