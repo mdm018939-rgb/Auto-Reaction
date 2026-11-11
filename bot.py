@@ -8,6 +8,7 @@ from telegram.ext import (ApplicationBuilder, Application, CommandHandler, Messa
                           ApplicationHandlerStop)
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 log = logging.getLogger("motherbot")
 
 # ================= কনফিগ =================
@@ -169,7 +170,7 @@ class ChannelStore:
             if not (self.todo or self.dirty or self.index_dirty):
                 return
             todo, self.todo = self.todo, set()
-            for k in todo:
+            for k in sorted(todo):
                 try:
                     if k not in self.snap:
                         mid = self.msg_of.pop(k, None)
@@ -202,8 +203,8 @@ class ChannelStore:
                 except Exception as e:
                     self.index_dirty = True
                     log.error("%s index: %s", self.name, e)
-    class Storage:
-        def __init__(self):
+class Storage:
+    def __init__(self):
         self.data = {"users": {}, "bots": {}}
         self.removed = {}
         self.stores = {}
